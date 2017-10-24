@@ -1,0 +1,50 @@
+#This code takes ~12 seconds to run on ~150 .txt files.
+#Since the earlier version (which created errcounts but not errfc) only took ~1 second, I have doubts about the efficiency of my code
+#But taking one minute to analyze all the SS files isn't outrageously time-consuming
+
+import sys
+import enchant
+from enchant.checker import SpellChecker
+from enchant.tokenize import EmailFilter, URLFilter
+chkr = SpellChecker("en_US",filters=[EmailFilter,URLFilter])
+#chkr program is modified to discount email addresses and URLs as errors
+
+#errcounts takes file name as key and number of errors as value
+errcounts = {}
+
+#errfc, or error frequency count
+errfc = {}
+
+#for every file in folder, set "data" to file text, feed "data" into chkr, and enter chkr result into errcounts
+#also enters frequency into errfc
+for f in sys.stdin:
+	f = f[:-1]
+	#[:-1] because the program, for some reason, adds a /n to the end of every file name taken from above
+	with open(str(f),'r') as p:
+		data = p.read()
+	chkr.set_text(data)
+	for err in chkr:
+		errcounts[f[44:]] = errcounts.get(f[44:],0) + 1
+		#the [44:] strips file path information (which is computer-specific anyway) from the key
+	nwords = float(len(data.split()))
+	freq = errcounts[f[44:]] / nwords
+	errfc[f[44:]] = freq
+
+#err_t is the total number of errors in the folder. freq_t is an intermediate variable used to calculate average error frequency
+err_t = 0
+freq_t = 0
+
+for key in errcounts:
+	print(key, "number errors: %d" %errcounts[key], "frequency: %.6f" %errfc[key])
+	err_t += errcounts[key]
+	freq_t += errfc[key]
+
+avg = err_t / len(errcounts)
+avgfc = freq_t / len(errfc)
+print("On average, there are %d reading errors per document." %avg)
+print("On average, %f of the document is a reading error." %avgfc)
+
+#it wouldn't take long to further specify the code to show which words are misspelled in every document
+#reminder to myself that enchant does have a module for guided error correction
+#error distribution?
+#"getting at the OCR error rate through the spelling error rate"?
