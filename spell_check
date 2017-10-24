@@ -43,8 +43,3 @@ avg = err_t / len(errcounts)
 avgfc = freq_t / len(errfc)
 print("On average, there are %d reading errors per document." %avg)
 print("On average, %f of the document is a reading error." %avgfc)
-
-#it wouldn't take long to further specify the code to show which words are misspelled in every document
-#reminder to myself that enchant does have a module for guided error correction
-#error distribution?
-#"getting at the OCR error rate through the spelling error rate"?
